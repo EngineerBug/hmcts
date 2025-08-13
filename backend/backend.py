@@ -1,87 +1,86 @@
-from flask import Flask, request
-import logging
+from sqlite3 import connect
+from datetime import datetime
+from backend.py.consts import SUCCESS, FAILURE, UNKNOWN, CREATE_TASK_TABLE_SQL_STRING, DATE_TIME_FORMAT, ERROR_MSG_NAME
 
-from backend.py.database import Respository
-from backend.py.consts import FAILURE, UNKNOWN
+class Respository:
+    def __init__(self, dbName):
+        self.database = f'{dbName}.db' 
+        self.make()
 
-api = Flask(__name__)
-db = Respository('main')
+    def make(self):
+        with connect(self.database) as connection:
+            cursor = connection.cursor()
+            cursor.execute(CREATE_TASK_TABLE_SQL_STRING)
+            connection.commit()
 
-log_format = '%(levelname)s %(asctime)s - %(message)s'
-logging.basicConfig(filename = "main.log",
-                    level = logging.INFO,
-                    encoding = 'utf-8',
-                    format = log_format,)
-logger = logging.getLogger()
+    # create task
+    def createTask(self, title, status, dueDateTime, description=''):
+        if title == '' or title is None:
+            return {ERROR_MSG_NAME:'failed to create, title was empty'}
+        if status == '' or status is None:
+            return {ERROR_MSG_NAME:'failed to create, status was empty'}
+        if dueDateTime == '' or dueDateTime is None:
+            return {ERROR_MSG_NAME:'failed to create, date/time was empty'}
+        try:
+            datetime.strptime(dueDateTime, DATE_TIME_FORMAT)
+        except ValueError:
+            return {ERROR_MSG_NAME:f'dueDateTime format should be {DATE_TIME_FORMAT}'}
+        
+        with connect(self.database) as connection:
+            cursor = connection.cursor()
+            cursor.execute('insert into Task (title, description, status, dueDateTime) values (?, ?, ?, ?)', (title, description, status, dueDateTime))
+            connection.commit()
+            return {'rowCount':cursor.rowcount}
+        return {ERROR_MSG_NAME:f'failed to add task with title {title}'}
 
-# create task
-@api.route('/create', methods=['POST'])
-def create():
-    json = request.getJson()
-    if 'title' not in json:
-        return {'errorMsg': 'failed to create, missing title'}, 404
-    if 'status' not in json:
-        return {'errorMsg': 'failed to create, missing status'}, 404
-    if 'dueDateTime' not in json:
-        return {'errorMsg': 'failed to create, missing dueDateTime'}, 404
-    
-    result = None
-    if 'description' in json:
-        db.createTask(json['title'], json['status'], json['dueDateTime'], json['description'])
-    else:
-        db.createTask(json['title'], json['status'], json['dueDateTime'])
+    # retrieve task by id
+    # [{'idFound': {1, 0, -1}, 'id': int, 'title': String, 'description': String, 'status': String, 'dueDateTime': DateTime}]
+    def getTask(self, id):
+        with connect(self.database) as connection:
+            cursor = connection.cursor()
+            cursor.execute('select * from Task where id=?', (id,))
+            row = cursor.fetchone()
+            if row == None:
+                return {'idFound':FAILURE, ERROR_MSG_NAME:f'id {id} not found in Tasks'}
+            return {'idFound':SUCCESS, 'id':row[0], 'title':row[1], 'description':row[2], 'status':row[3], 'dueDateTime':datetime.strptime(row[4], DATE_TIME_FORMAT)}
+        return {'idFound':UNKNOWN, ERROR_MSG_NAME:f'failed to get task with id {id}'}
 
-    if result == None or 'errorMsg' in result:
-        return {'errorMsg':result['errorMsg']}, 500
-    return 201
+    # retrieve all tasks
+    # [{'id': int, 'title': String, 'description': String, 'status': String, 'dueDateTime': DateTime}]
+    def getTasks(self):
+        with connect(self.database) as connection:
+            cursor = connection.cursor()
+            cursor.execute('select * from Task')
+            rows = cursor.fetchall()
+            return [{'id':row[0], 'title':row[1], 'description':row[2], 'status':row[3], 'dueDateTime':datetime.strptime(row[4], DATE_TIME_FORMAT)} for row in rows]
+        return {ERROR_MSG_NAME:'get task action failed'}
 
-# retrieve task by id
-@api.route('/get_task/<int:id>', methods=['GET'])
-def getTaskById(id):
-    task = db.getTask(id)
-    if task['idFound'] == FAILURE:
-        return {'errorMsg': 'failed to get task'}, 404
-    if task['idFound'] == UNKNOWN:
-        return {'errorMsg': 'failed to get task'}, 500
-    return task, 200
+    # update the status of a task
+    def updateTaskStatus(self, id, newStatus):
+        if newStatus == '' or newStatus is None:
+            return {ERROR_MSG_NAME:'did not update, missing status'}
+        
+        with connect(self.database) as connection:
+            cursor = connection.cursor()
 
-# retrieve all tasks
-@api.route('/get_tasks', methods=['GET'])
-def getTasks():
-    tasks = db.getTasks()
-    if 'errorMsg' in tasks:
-        return {'errorMsg': 'failed to get tasks'}, 500
-    return tasks, 200
+            cursor.execute('select count(id) from Task where id=?', (id,))
+            if cursor.fetchone()[0] == 0:
+                return {ERROR_MSG_NAME:'did not update, invalid id'}
+            
+            cursor.execute('update Task set status=? where id=?', (newStatus, id))
+            connection.commit()
+            return {'id':cursor.lastrowid}
+        return {ERROR_MSG_NAME:f'failed to update task with id {id}'}
 
-# update the status of a task
-@api.route('/update_status/<int:id>', methods=['PATCH', 'PUT'])
-def updateStatus(id):
-    newStatus = request.getJson()['status']
-    if newStatus is None:
-        return {'errorMsg': f'failed to update task, new \'status\' required as JSON'}, 404
-    target = db.getTask(id)
-    if target['idFound'] == FAILURE:
-        return {'errorMsg': f'failed to update task, {id} not valid task'}, 404
-    if target['idFound'] == UNKNOWN:
-        return {'errorMsg': 'failed to update task'}, 500
-    if 'errorMsg' in db.updateTaskStatus(id, newStatus):
-        return {'errorMsg': 'failed to update task'}, 500
-    return 204
+    # delete a task
+    def deleteTask(self, id):
+        with connect(self.database) as connection:
+            cursor = connection.cursor()
 
-# delete a task
-@api.route('/delete/<int:id>', methods=['DELETE'])
-def delete(id):
-    target = db.getTask(id)
-    if target['idFound'] == FAILURE:
-        return {'errorMsg': f'failed to delete task, {id} not valid task'}, 404
-    if target['idFound'] == UNKNOWN or 'errorMsg' in db.deleteTask(id):
-        return {'errorMsg': 'failed to delete task'}, 500
-    return 204
-
-# frontend page (Create, view, update, and delete tasks in a user friendly manner)
-@api.route('/', methods=['GET'])
-def main():
-    pass
-
-if __name__ == '__main__':
-    api.run(host='127.0.0.1', port='8080')
+            cursor.execute('select count(id) from Task where id=?', (id,))
+            if cursor.fetchone()[0] == 0:
+                return {ERROR_MSG_NAME:'did not delete, invalid id'}
+            
+            cursor.execute('delete from Task where id=?', (id,))
+            return {'id':cursor.lastrowid}
+        return {ERROR_MSG_NAME:f'failed to delete task with id {id}'}

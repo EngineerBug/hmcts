@@ -1,5 +1,5 @@
-from backend.py.database import Respository
-from backend.py.consts import CREATE_TASK_TABLE_SQL_STRING, FAILURE, DATE_TIME_FORMAT
+from backend.backend import Respository
+from backend.py.consts import CREATE_TASK_TABLE_SQL_STRING, FAILURE, DATE_TIME_FORMAT, ERROR_MSG_NAME
 from sqlite3 import connect
 from unittest import TestCase
 from datetime import datetime
@@ -42,6 +42,54 @@ class Testing(TestCase):
         self.assertEqual(result[0][3], 'NOT STARTED')
         self.assertEqual(result[0][4], '2026-12-05 09:45:00')
 
+    def testAdd_emptyTitle(self):
+        # given
+        # when
+        result = self.db.createTask('', 'NOT STARTED', '2026-12-05 09:45:00', 'asgfagrgesdvcwadh')
+
+        # then
+        self.assertEqual(result['errorMsg'], 'failed to create, title was empty')
+
+    def testAdd_noneTitle(self):
+        # given
+        # when
+        result = self.db.createTask(None, 'NOT STARTED', '2026-12-05 09:45:00', 'asgfagrgesdvcwadh')
+
+        # then
+        self.assertEqual(result['errorMsg'], 'failed to create, title was empty')
+
+    def testAdd_emptyStatus(self):
+        # given
+        # when
+        result = self.db.createTask('task3', '', '2026-12-05 09:45:00', 'asgfagrgesdvcwadh')
+
+        # then
+        self.assertEqual(result['errorMsg'], 'failed to create, status was empty')
+
+    def testAdd_noneStatus(self):
+        # given
+        # when
+        result = self.db.createTask('task3', None, '2026-12-05 09:45:00', 'asgfagrgesdvcwadh')
+
+        # then
+        self.assertEqual(result['errorMsg'], 'failed to create, status was empty')
+
+    def testAdd_emptyDueDateTime(self):
+        # given
+        # when
+        result = self.db.createTask('task3', 'NOT STARTED', '', 'asgfagrgesdvcwadh')
+
+        # then
+        self.assertEqual(result['errorMsg'], 'failed to create, date/time was empty')
+
+    def testAdd_noneDueDateTime(self):
+        # given
+        # when
+        result = self.db.createTask('task3', 'NOT STARTED', None, 'asgfagrgesdvcwadh')
+
+        # then
+        self.assertEqual(result['errorMsg'], 'failed to create, date/time was empty')
+
     def testAdd_wrongDateTimeFormat(self):
         # given
 
@@ -49,7 +97,7 @@ class Testing(TestCase):
         result = self.db.createTask('task3', 'NOT STARTED', 'INVALID', 'asgfagrgesdvcwadh')
 
         # then
-        self.assertEqual(result['errorMsg'], f'dueDateTime format should be {DATE_TIME_FORMAT}')
+        self.assertEqual(result[ERROR_MSG_NAME], f'dueDateTime format should be {DATE_TIME_FORMAT}')
 
     def testGetById_success(self):
         # given
@@ -72,7 +120,7 @@ class Testing(TestCase):
         result = self.db.getTask(1)
 
         # then
-        self.assertEqual(result['errorMsg'], 'id 1 not found in Tasks')
+        self.assertEqual(result[ERROR_MSG_NAME], 'id 1 not found in Tasks')
         self.assertEqual(result['idFound'], FAILURE)
 
     def testRetriveAllTasks_success(self):
@@ -120,7 +168,7 @@ class Testing(TestCase):
         result = self.db.updateTaskStatus(id, '')
 
         # then
-        self.assertEqual(result['errorMsg'], 'did not update, missing status')
+        self.assertEqual(result[ERROR_MSG_NAME], 'did not update, missing status')
 
     def testUpdate_invalidId(self):
         # given
@@ -131,7 +179,7 @@ class Testing(TestCase):
         result = self.db.updateTaskStatus(1, 'COMPLETE')
 
         # then
-        self.assertEqual(result['errorMsg'], 'did not update, invalid id')
+        self.assertEqual(result[ERROR_MSG_NAME], 'did not update, invalid id')
 
     def testDelete_success(self):
         # given
@@ -154,4 +202,4 @@ class Testing(TestCase):
         result = self.db.deleteTask(1)
 
         # then
-        self.assertEqual(result['errorMsg'], 'did not delete, invalid id')
+        self.assertEqual(result[ERROR_MSG_NAME], 'did not delete, invalid id')

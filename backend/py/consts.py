@@ -9,3 +9,5 @@ CREATE_TASK_TABLE_SQL_STRING = '''CREATE TABLE IF NOT EXISTS Task (
         status TEXT NOT NULL,
         dueDateTime DATETIME NOT NULL
     )'''
+
+ERROR_MSG_NAME = 'errorMsg'
