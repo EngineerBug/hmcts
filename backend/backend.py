@@ -5,7 +5,7 @@ from src.py.database import Respository
 from src.py.consts import FAILURE, UNKNOWN
 
 api = Flask(__name__)
-db = Respository()
+db = Respository('main')
 
 log_format = '%(levelname)s %(asctime)s - %(message)s'
 logging.basicConfig(filename = "main.log",
