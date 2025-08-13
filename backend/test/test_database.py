@@ -1,5 +1,5 @@
-from src.py.database import Respository
-from src.py.consts import CREATE_TASK_TABLE_SQL_STRING, FAILURE, DATE_TIME_FORMAT
+from backend.py.database import Respository
+from backend.py.consts import CREATE_TASK_TABLE_SQL_STRING, FAILURE, DATE_TIME_FORMAT
 from sqlite3 import connect
 from unittest import TestCase
 from datetime import datetime

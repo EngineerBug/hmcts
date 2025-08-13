@@ -1,8 +1,8 @@
 from flask import Flask, request
 import logging
 
-from src.py.database import Respository
-from src.py.consts import FAILURE, UNKNOWN
+from backend.py.database import Respository
+from backend.py.consts import FAILURE, UNKNOWN
 
 api = Flask(__name__)
 db = Respository('main')

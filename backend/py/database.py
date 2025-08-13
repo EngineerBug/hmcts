@@ -1,6 +1,6 @@
 from sqlite3 import connect
 from datetime import datetime
-from src.py.consts import SUCCESS, FAILURE, UNKNOWN, CREATE_TASK_TABLE_SQL_STRING, DATE_TIME_FORMAT
+from backend.py.consts import SUCCESS, FAILURE, UNKNOWN, CREATE_TASK_TABLE_SQL_STRING, DATE_TIME_FORMAT
 
 class Respository:
     def __init__(self, dbName):
