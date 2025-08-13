@@ -86,19 +86,72 @@ class Testing(TestCase):
         self.assertEqual(results[0]['title'], 'task1')
 
     def testRetriveAllTasks_empty(self):
-        pass
+        # given
+        self.cursor.execute(f'delete from Task')
+        self.connection.commit()
+
+        # when
+        results = self.db.getTasks()
+        
+        # then
+        self.assertEqual(len(results), 0)
 
     def testUpdate_success(self):
-        pass
+        # given
+        self.cursor.execute('select id from Task where title=\'task2\'')
+        id = self.cursor.fetchone()[0]
+        self.db.updateTaskStatus(id, 'COMPLETE')
+
+        # when
+        result = self.db.getTask(id)
+        
+        # then
+        self.assertEqual(result['title'], 'task2')
+        self.assertEqual(result['description'], '')
+        self.assertEqual(result['status'], 'COMPLETE')
+        self.assertEqual(result['dueDateTime'], datetime(2026, 1, 13, 23, 59, 59))
 
     def testUpdate_emptyStatus(self):
-        pass
+        # given
+        self.cursor.execute('select id from Task where title=\'task2\'')
+        id = self.cursor.fetchone()[0]
+
+        # when
+        result = self.db.updateTaskStatus(id, '')
+
+        # then
+        self.assertEqual(result['errorMsg'], 'did not update, missing status')
 
     def testUpdate_invalidId(self):
-        pass
+        # given
+        self.cursor.execute(f'delete from Task')
+        self.connection.commit()
+
+        # when
+        result = self.db.updateTaskStatus(1, 'COMPLETE')
+
+        # then
+        self.assertEqual(result['errorMsg'], 'did not update, invalid id')
 
     def testDelete_success(self):
-        pass
+        # given
+        self.cursor.execute('select * from Task where title=\'task2\'')
+        id = self.cursor.fetchone()[0]
+        self.db.deleteTask(id)
+
+        # when
+        result = self.db.getTask(id)
+        
+        # then
+        self.assertEqual(result['idFound'], FAILURE)
 
     def testDelete_invalidId(self):
-        pass
+        # given
+        self.cursor.execute(f'delete from Task')
+        self.connection.commit()
+
+        # when
+        result = self.db.deleteTask(1)
+
+        # then
+        self.assertEqual(result['errorMsg'], 'did not delete, invalid id')

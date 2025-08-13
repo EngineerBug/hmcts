@@ -51,8 +51,16 @@ class Respository:
 
     # update the status of a task
     def updateTaskStatus(self, id, newStatus):
+        if newStatus == '' or newStatus is None:
+            return {'errorMsg':'did not update, missing status'}
+        
         with connect(self.database) as connection:
             cursor = connection.cursor()
+
+            cursor.execute('select count(id) from Task where id=?', (id,))
+            if cursor.fetchone()[0] == 0:
+                return {'errorMsg':'did not update, invalid id'}
+            
             cursor.execute('update Task set status=? where id=?', (newStatus, id))
             connection.commit()
             return {'id':cursor.lastrowid}
@@ -62,12 +70,11 @@ class Respository:
     def deleteTask(self, id):
         with connect(self.database) as connection:
             cursor = connection.cursor()
+
+            cursor.execute('select count(id) from Task where id=?', (id,))
+            if cursor.fetchone()[0] == 0:
+                return {'errorMsg':'did not delete, invalid id'}
+            
             cursor.execute('delete from Task where id=?', (id,))
             return {'id':cursor.lastrowid}
         return {'errorMsg':f'failed to delete task with id {id}'}
-    
-    def delete_all(self):
-        with connect(self.database) as connection:
-            cursor = connection.cursor()
-            connection.commit()
-            return cursor.rowcount
