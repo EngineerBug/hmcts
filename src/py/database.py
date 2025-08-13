@@ -1,34 +1,28 @@
 from sqlite3 import connect
 from datetime import datetime
-from src.py.consts import SUCCESS, FAILURE, UNKNOWN
-
-DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+from src.py.consts import SUCCESS, FAILURE, UNKNOWN, CREATE_TASK_TABLE_SQL_STRING, DATE_TIME_FORMAT
 
 class Respository:
-    def __init__(self):
-        self.database = 'tasks.db' 
+    def __init__(self, dbName):
+        self.database = f'{dbName}.db' 
         self.make()
 
     def make(self):
         with connect(self.database) as connection:
             cursor = connection.cursor()
-            cursor.execute(
-                '''CREATE TABLE IF NOT EXISTS Task (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    title TEXT NOT NULL,
-                    description TEXT,
-                    status TEXT NOT NULL,
-                    dueDateTime DATETIME NOT NULL
-                )'''
-            )
+            cursor.execute(CREATE_TASK_TABLE_SQL_STRING)
             connection.commit()
 
     # create task
     def createTask(self, title, status, dueDateTime, description=''):
+        try:
+                datetime.strptime(dueDateTime, DATE_TIME_FORMAT)
+        except ValueError:
+            return {'errorMsg':f'dueDateTime format should be {DATE_TIME_FORMAT}'}
+        
         with connect(self.database) as connection:
             cursor = connection.cursor()
             cursor.execute('insert into Task (title, description, status, dueDateTime) values (?, ?, ?, ?)', (title, description, status, dueDateTime))
-            
             connection.commit()
             return {'rowCount':cursor.rowcount}
         return {'errorMsg':f'failed to add task with title {title}'}
@@ -40,9 +34,9 @@ class Respository:
             cursor = connection.cursor()
             cursor.execute('select * from Task where id=?', (id,))
             row = cursor.fetchone()
-            if len(row) == 0:
+            if row == None:
                 return {'idFound':FAILURE, 'errorMsg':f'id {id} not found in Tasks'}
-            return {'idFound':SUCCESS, 'id':row[0], 'title':row[1], 'description':row[2], 'status':row[3], 'dueDateTime':datetime.strptime(row[4], DATE_FORMAT)}
+            return {'idFound':SUCCESS, 'id':row[0], 'title':row[1], 'description':row[2], 'status':row[3], 'dueDateTime':datetime.strptime(row[4], DATE_TIME_FORMAT)}
         return {'idFound':UNKNOWN, 'errorMsg':f'failed to get task with id {id}'}
 
     # retrieve all tasks
@@ -52,7 +46,7 @@ class Respository:
             cursor = connection.cursor()
             cursor.execute('select * from Task')
             rows = cursor.fetchall()
-            return [{'id':row[0], 'title':row[1], 'description':row[2], 'status':row[3], 'dueDateTime':datetime.strptime(row[4], DATE_FORMAT)} for row in rows]
+            return [{'id':row[0], 'title':row[1], 'description':row[2], 'status':row[3], 'dueDateTime':datetime.strptime(row[4], DATE_TIME_FORMAT)} for row in rows]
         return {'errorMsg':'get task action failed'}
 
     # update the status of a task
@@ -75,6 +69,5 @@ class Respository:
     def delete_all(self):
         with connect(self.database) as connection:
             cursor = connection.cursor()
-            cursor.execute(f'DELETE FROM {self.table}')
             connection.commit()
             return cursor.rowcount
