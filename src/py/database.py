@@ -1,6 +1,6 @@
 from sqlite3 import connect
 from datetime import datetime
-from src.consts import SUCCESS, FAILURE, UNKNOWN
+from src.py.consts import SUCCESS, FAILURE, UNKNOWN
 
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
@@ -71,3 +71,10 @@ class Respository:
             cursor.execute('delete from Task where id=?', (id,))
             return {'id':cursor.lastrowid}
         return {'errorMsg':f'failed to delete task with id {id}'}
+    
+    def delete_all(self):
+        with connect(self.database) as connection:
+            cursor = connection.cursor()
+            cursor.execute(f'DELETE FROM {self.table}')
+            connection.commit()
+            return cursor.rowcount
