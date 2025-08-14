@@ -3,7 +3,7 @@ from secrets import token_hex
 import logging
 
 from backend.backend import Database
-from backend.consts import SUCCESS, ERROR_MSG_NAME
+from backend.consts import ERROR_MSG_NAME
 
 app = Flask(__name__)
 app.secret_key = token_hex(32)
@@ -40,10 +40,10 @@ def create():
     logger.info(f'create result: {result}')
 
     # return the appropriate response
-    if result['status'] == SUCCESS:
-        flash(f'task successfully created', 'success')
-    else:
+    if ERROR_MSG_NAME in result:
         flash(result[ERROR_MSG_NAME], 'failure')
+    else:
+        flash(f'task successfully created', 'success')
     return redirect('/')
 
 # update the status of a task
