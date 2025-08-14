@@ -1,10 +1,12 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, flash, redirect
+from secrets import token_hex
 import logging
 
 from backend.backend import Database
-from backend.py.consts import FAILURE, UNKNOWN
+from backend.py.consts import FAILURE, SUCCESS, UNKNOWN
 
 app = Flask(__name__)
+app.secret_key = token_hex(32)
 db = Database('main')
 
 log_format = '%(levelname)s %(asctime)s - %(message)s'
@@ -38,45 +40,31 @@ def create():
     logger.info(f'create result: {result}')
 
     # return the appropriate response
-    if result['status'] == FAILURE:
-        return {'errorMsg':result['errorMsg']}, 404
-    elif result['status'] == UNKNOWN:
-        return {'errorMsg':result['errorMsg']}, 500
-    return {}, 201
-
-# retrieve task by id
-@app.route('/get_task/<int:id>', methods=['GET'])
-def getTaskById(id):
-    task = db.getTask(id)
-    if task['idFound'] == FAILURE:
-        return {'errorMsg': 'failed to get task, invalid id'}, 404
-    if task['idFound'] == UNKNOWN:
-        return {'errorMsg': 'failed to get task, internal error'}, 500
-    return task, 200
-
-# retrieve all tasks
-@app.route('/get_tasks', methods=['GET'])
-def getTasks():
-    tasks = db.getTasks()
-    if 'errorMsg' in tasks:
-        return {'errorMsg': 'failed to get tasks'}, 500
-    return tasks, 200
+    if result['status'] == SUCCESS:
+        flash(f'task successfully created', 'success')
+    else:
+        flash(result['errorMsg'], 'failure')
+    return redirect('/')
 
 # update the status of a task
 @app.route('/update_status/<int:id>', methods=['POST', 'PATCH', 'PUT'])
 def updateStatus(id):
     result = db.updateTaskStatus(id, request.form['newStatus'])
     if 'errorMsg' in result:
-        return {'errorMsg': result['errorMsg']}, 404
-    return {}, 204
+        flash(result['errorMsg'], 'failure')
+    else:
+        flash(f'task successfully updated', 'success')
+    return redirect('/')
 
 # delete a task
 @app.route('/delete/<int:id>', methods=['POST', 'DELETE'])
 def delete(id):
     result = db.deleteTask(id)
     if 'errorMsg' in result:
-        return {'errorMsg': result['errorMsg']}, 404
-    return {}, 204
+        flash(result['errorMsg'], 'failure')
+    else:
+        flash(f'task successfully deleted', 'success')
+    return redirect('/')
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', debug=True, port='8080')

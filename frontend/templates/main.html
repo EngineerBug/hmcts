@@ -90,13 +90,13 @@
         function updateTask(id) {
             console.log("opened update window")
             updatePopup.style.display = "block";
-            form.action = `/update_status/${id}`;
+            updateForm.action = `/update_status/${id}`;
         }
 
         function deleteTask(id) {
             console.log("opened delete window")
             deletePopup.style.display = "block";
-            form.action = `/delete/${id}`;
+            deleteForm.action = `/delete/${id}`;
         }
 
         function cancel() {

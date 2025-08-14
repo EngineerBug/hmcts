@@ -75,27 +75,6 @@ table, th, td {
   color: #9A9;
 }
 
-/* grey */
-.alert-info {
-  background-color: #EEE;
-  border: 1px solid #DDD;
-  color: #999;
-}
-
-/* blue */
-.alert-notice {
-  background-color: #EFF;
-  border: 1px solid #DEE;
-  color: #9AA;
-}
-
-/* yellow */
-.alert-warning {
-  background-color: #FDF7DF;
-  border: 1px solid #FEEC6F;
-  color: #C9971C;
-}
-
 /* red */
 .alert-failure {
   background-color: #FEE;
