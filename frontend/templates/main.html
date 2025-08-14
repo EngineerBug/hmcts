@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<head>
+    <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}"/>
+    <title>Task Manager</title>
+</head>
+<body>
+    <div id="content">
+        <div id="alerts">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, msg in messages %}
+                        <div class="alert alert-{{ category }}">{{ msg }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        <table id="task-table">
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Due Date/Time</th>
+                <th>Update</th>
+                <th>Delete</th>
+            </tr>
+            {%for task in tasks%}
+                <tr class="{%if task.status == 'COMPLETE'%}completed-row{%else%}{%endif%}">
+                    <td>{{task.title}}</td>
+                    <td>{{task.description}}</td>
+                    <td>{{task.status}}</td>
+                    <td><button class="updateButton">/\</button></td>
+                    <td><a class="linkbutton" href="{{url_for('deleteTask', id=task.id)}}">X</a></td>
+                </tr>
+            {%endfor%}
+        </table>
+    </div>
+</body>
+</html>

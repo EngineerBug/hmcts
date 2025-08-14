@@ -1,0 +1,86 @@
+body {
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+}
+
+#content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 10vh;
+}
+
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+#task-table {
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.completed-row {
+    background-color: #27ae60;
+}
+
+a.linkbutton {
+  color: inherit;         /* Use surrounding text color */
+  text-decoration: none;  /* Remove underline */
+}
+
+/* credit to: https://alvarotrigo.com/blog/css-alerts/ for the alert CSS*/
+.alert {
+  position: relative;
+  top: 10;
+  left: 0;
+  width: auto;
+  height: auto;
+  padding: 10px;
+  margin: 10px;
+  line-height: 1.8;
+  border-radius: 5px;
+  cursor: hand;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-weight: 400;
+}
+
+/* green */
+.alert-success {
+  background-color: #EFE;
+  border: 1px solid #DED;
+  color: #9A9;
+}
+
+/* grey */
+.alert-info {
+  background-color: #EEE;
+  border: 1px solid #DDD;
+  color: #999;
+}
+
+/* blue */
+.alert-notice {
+  background-color: #EFF;
+  border: 1px solid #DEE;
+  color: #9AA;
+}
+
+/* yellow */
+.alert-warning {
+  background-color: #FDF7DF;
+  border: 1px solid #FEEC6F;
+  color: #C9971C;
+}
+
+/* red */
+.alert-failure {
+  background-color: #FEE;
+  border: 1px solid #EDD;
+  color: #A66;
+}
