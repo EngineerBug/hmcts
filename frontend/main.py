@@ -3,7 +3,7 @@ from secrets import token_hex
 import logging
 
 from backend.backend import Database
-from backend.py.consts import FAILURE, SUCCESS, UNKNOWN
+from backend.consts import SUCCESS, ERROR_MSG_NAME
 
 app = Flask(__name__)
 app.secret_key = token_hex(32)
@@ -43,15 +43,15 @@ def create():
     if result['status'] == SUCCESS:
         flash(f'task successfully created', 'success')
     else:
-        flash(result['errorMsg'], 'failure')
+        flash(result[ERROR_MSG_NAME], 'failure')
     return redirect('/')
 
 # update the status of a task
 @app.route('/update_status/<int:id>', methods=['POST', 'PATCH', 'PUT'])
 def updateStatus(id):
     result = db.updateTaskStatus(id, request.form['newStatus'])
-    if 'errorMsg' in result:
-        flash(result['errorMsg'], 'failure')
+    if ERROR_MSG_NAME in result:
+        flash(result[ERROR_MSG_NAME], 'failure')
     else:
         flash(f'task successfully updated', 'success')
     return redirect('/')
@@ -60,11 +60,11 @@ def updateStatus(id):
 @app.route('/delete/<int:id>', methods=['POST', 'DELETE'])
 def delete(id):
     result = db.deleteTask(id)
-    if 'errorMsg' in result:
-        flash(result['errorMsg'], 'failure')
+    if ERROR_MSG_NAME in result:
+        flash(result[ERROR_MSG_NAME], 'failure')
     else:
         flash(f'task successfully deleted', 'success')
     return redirect('/')
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', debug=True, port='8080')
+    app.run(host='127.0.0.1', port='8080')

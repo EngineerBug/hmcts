@@ -1,6 +1,6 @@
 from sqlite3 import connect
 from datetime import datetime
-from backend.py.consts import SUCCESS, FAILURE, UNKNOWN, DATE_TIME_FORMAT, ERROR_MSG_NAME
+from .consts import SUCCESS, FAILURE, UNKNOWN, DATE_TIME_FORMAT, ERROR_MSG_NAME
 
 class Database:
     def __init__(self, dbName):

@@ -1,8 +1,7 @@
 from backend.backend import Database
-from backend.py.consts import SUCCESS, FAILURE, ERROR_MSG_NAME
+from backend.consts import SUCCESS, FAILURE, ERROR_MSG_NAME
 from sqlite3 import connect
 from unittest import TestCase
-from datetime import datetime
 
 TEST_DB_NAME = 'test'
 DB = TEST_DB_NAME + '.db'
@@ -187,6 +186,13 @@ class Testing(TestCase):
         # then
         self.assertEqual(result['isUpdated'], FAILURE)
 
+    def testUpdate_stringId(self):
+        # when
+        result = self.db.updateTaskStatus('hello', 'COMPLETE')
+
+        # then
+        self.assertEqual(result['isUpdated'], FAILURE)
+
     def testDelete_success(self):
         # given
         self.cursor.execute('select * from Task where title=\'task2\'')
@@ -210,3 +216,11 @@ class Testing(TestCase):
 
         # then
         self.assertEqual(result['isDeleted'], FAILURE)
+
+    def testDelete_stringId(self):
+        # when
+        result = self.db.deleteTask('hello')
+
+        # then
+        self.assertEqual(result['isDeleted'], FAILURE)
+        self.assertEqual(len(self.db.getTasks()), 2)
