@@ -28,11 +28,84 @@
                     <td>{{task.title}}</td>
                     <td>{{task.description}}</td>
                     <td>{{task.status}}</td>
-                    <td><button class="updateButton">/\</button></td>
-                    <td><a class="linkbutton" href="{{url_for('deleteTask', id=task.id)}}">X</a></td>
+                    <td>{{task.dueDateTime}}</td>
+                    <td><button onclick="updateTask({{task.id}})">UPDATE</button></td>
+                    <td><button onclick="deleteTask({{task.id}})">DELETE</button></td>
                 </tr>
             {%endfor%}
         </table>
+        </br>
+        <h2>Create New Task</h2>
+        <form action="{{url_for('create')}}" method="POST">
+            <label for="title">Title:</label>
+            </br>
+            <input type="text" id="title" name="title" required>
+            </br></br>
+            <label for="description">Description:</label>
+            </br>
+            <textarea id="description" name="description" rows="4"></textarea>
+            </br></br>
+            <label for="title">Status:</label>
+            </br>
+            <input type="text" id="status" name="status" required>
+            </br></br>
+            <label for="datetime">Due Date/Time:</label>
+            </br>
+            <input type="datetime-local" id="datetime" name="datetime" required>
+            </br></br>
+            <button type="submit">Submit</button>
+        </form>
     </div>
+
+    <!-- The update popup-->
+    <div id="updatePopup" class="popup">
+        <div class="popup-content">
+            <h2>Enter a new status:</h2>
+            <form id="updatePopup-form" method="POST">
+                <input type="text" name="newStatus" required>
+                <br><br>
+                <button type="submit">Submit</button>
+                <button type="button" onclick="cancel()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- The delete popup -->
+    <div id="deletePopup" class="popup">
+        <div class="popup-content">
+            <h2>Are you sure you want to Delete?</h2>
+            <form id="deletePopup-form" method="POST">
+                <button type="submit">Submit</button>
+                <button type="button" onclick="cancel()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const updatePopup = document.getElementById("updatePopup");
+        const deletePopup = document.getElementById("deletePopup")
+        const updateForm = document.getElementById("updatePopup-form");
+        const deleteForm = document.getElementById("deletePopup-form");
+
+        function updateTask(id) {
+            console.log("opened update window")
+            updatePopup.style.display = "block";
+            form.action = `/update_status/${id}`;
+        }
+
+        function deleteTask(id) {
+            console.log("opened delete window")
+            deletePopup.style.display = "block";
+            form.action = `/delete/${id}`;
+        }
+
+        function cancel() {
+            console.log("closed popup window")
+            updatePopup.style.display = "none";
+            deletePopup.style.display = "none";
+            updateForm.action = ""
+            deleteForm.action = ""
+        }
+    </script>
 </body>
 </html>

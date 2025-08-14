@@ -8,13 +8,13 @@ app = Flask(__name__)
 db = Database('main')
 
 log_format = '%(levelname)s %(asctime)s - %(message)s'
-logging.basicConfig(filename = "main.log",
+logging.basicConfig(filename = 'main.log',
                     level = logging.INFO,
                     encoding = 'utf-8',
                     format = log_format,)
 logger = logging.getLogger()
 
-# frontend page (Create, view, update, and delete tasks in a user friendly manner)
+# frontend page; create, view, update, and delete tasks in a user friendly manner
 @app.route('/', methods=['GET'])
 def main():
     tasks = db.getTasks()
@@ -23,28 +23,26 @@ def main():
 # create task
 @app.route('/create', methods=['POST'])
 def create():
-    json = request.getJson()
-    if 'title' not in json:
-        return {'errorMsg': 'failed to create, missing title'}, 404
-    if 'status' not in json:
-        return {'errorMsg': 'failed to create, missing status'}, 404
-    if 'dueDateTime' not in json:
-        return {'errorMsg': 'failed to create, missing dueDateTime'}, 404
-    
-    result = None
-    if 'description' in json:
-        db.createTask(json['title'], json['status'], json['dueDateTime'], json['description'])
-    else:
-        db.createTask(json['title'], json['status'], json['dueDateTime'])
+    title = request.form['title']
+    description = request.form['description']
+    status = request.form['status']
+    datetime = request.form['datetime']
 
-    if result == None:
-        return {'errorMsg':'did not create, something went wrong'}, 500
-    elif result['status'] == FAILURE:
+    # convert from HTML format (YYYY-MM-DDThh:mm) to SQL format (YYYY-MM-DD hh:mm:ss)
+    logger.info(f'datetime recived by create: {datetime}')
+    parsedDatetime = datetime.replace('T', ' ') + ':00'
+    logger.info(f'datetime after parsed by create: {parsedDatetime}')
+
+    # perform the backend function call
+    result = db.createTask(title, status, parsedDatetime, description)
+    logger.info(f'create result: {result}')
+
+    # return the appropriate response
+    if result['status'] == FAILURE:
         return {'errorMsg':result['errorMsg']}, 404
     elif result['status'] == UNKNOWN:
         return {'errorMsg':result['errorMsg']}, 500
-        
-    return 201
+    return {}, 201
 
 # retrieve task by id
 @app.route('/get_task/<int:id>', methods=['GET'])
@@ -65,20 +63,20 @@ def getTasks():
     return tasks, 200
 
 # update the status of a task
-@app.route('/update_status/<int:id>', methods=['PATCH', 'PUT'])
+@app.route('/update_status/<int:id>', methods=['POST', 'PATCH', 'PUT'])
 def updateStatus(id):
-    result = db.updateTaskStatus(id, request.getJson()['status'])
+    result = db.updateTaskStatus(id, request.form['newStatus'])
     if 'errorMsg' in result:
         return {'errorMsg': result['errorMsg']}, 404
-    return 204
+    return {}, 204
 
 # delete a task
-@app.route('/delete/<int:id>', methods=['DELETE'])
+@app.route('/delete/<int:id>', methods=['POST', 'DELETE'])
 def delete(id):
     result = db.deleteTask(id)
     if 'errorMsg' in result:
         return {'errorMsg': result['errorMsg']}, 404
-    return 204
+    return {}, 204
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port='8080')
+    app.run(host='127.0.0.1', debug=True, port='8080')

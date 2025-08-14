@@ -11,6 +11,7 @@ body {
     min-height: 10vh;
 }
 
+/* task table styles */
 table, th, td {
   border: 1px solid black;
   border-collapse: collapse;
@@ -28,9 +29,26 @@ table, th, td {
     background-color: #27ae60;
 }
 
-a.linkbutton {
-  color: inherit;         /* Use surrounding text color */
-  text-decoration: none;  /* Remove underline */
+/* Popup styles*/
+.popup {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0; 
+  top: 0;
+  width: 100%; 
+  height: 100%;
+  outline:#999;
+  background:#f9f9f9;
+}
+
+.popup-content {
+  background: white;
+  margin: 15% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  text-align: center;
 }
 
 /* credit to: https://alvarotrigo.com/blog/css-alerts/ for the alert CSS*/
