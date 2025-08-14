@@ -35,7 +35,7 @@ class Testing(TestCase):
         result = self.cursor.fetchall()
 
         # then
-        self.assertEqual(creation['status'], SUCCESS)
+        self.assertEqual(creation['isCreated'], SUCCESS)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0][1], 'task3')
         self.assertEqual(result[0][2], 'asgfagrgesdvcwadh')
@@ -48,7 +48,7 @@ class Testing(TestCase):
         result = self.db.createTask('', 'NOT STARTED', '2026-12-05 09:45:00', 'asgfagrgesdvcwadh')
 
         # then
-        self.assertEqual(result['status'], FAILURE)
+        self.assertEqual(result['isCreated'], FAILURE)
 
     def testAdd_noneTitle(self):
         # given
@@ -97,7 +97,7 @@ class Testing(TestCase):
         result = self.db.createTask('task3', 'NOT STARTED', 'INVALID', 'asgfagrgesdvcwadh')
 
         # then
-        self.assertEqual(result['status'], FAILURE)
+        self.assertEqual(result['isCreated'], FAILURE)
 
     def testGetById_success(self):
         # given
@@ -157,11 +157,11 @@ class Testing(TestCase):
         row = self.db.getTask(id)
         
         # then
-        self.assertEqual(result['status'], SUCCESS)
+        self.assertEqual(result['isUpdated'], SUCCESS)
         self.assertEqual(row['title'], 'task2')
         self.assertEqual(row['description'], '')
         self.assertEqual(row['status'], 'COMPLETE')
-        self.assertEqual(row['dueDateTime'], '2026-12-05 09:45:00')
+        self.assertEqual(row['dueDateTime'], '2026-01-13 23:59:59')
 
     def testUpdate_emptyStatus(self):
         # given
@@ -174,7 +174,7 @@ class Testing(TestCase):
 
         # then
         self.assertEqual(row['status'], 'IN PROGRESS')
-        self.assertEqual(result['status'], FAILURE)
+        self.assertEqual(result['isUpdated'], FAILURE)
 
     def testUpdate_invalidId(self):
         # given
@@ -185,7 +185,7 @@ class Testing(TestCase):
         result = self.db.updateTaskStatus(1, 'COMPLETE')
 
         # then
-        self.assertEqual(result['status'], FAILURE)
+        self.assertEqual(result['isUpdated'], FAILURE)
 
     def testDelete_success(self):
         # given
@@ -197,7 +197,7 @@ class Testing(TestCase):
         row = self.db.getTask(id)
         
         # then
-        self.assertEqual(result['status'], SUCCESS)
+        self.assertEqual(result['isDeleted'], SUCCESS)
         self.assertEqual(row['idFound'], FAILURE)
 
     def testDelete_invalidId(self):
@@ -209,4 +209,4 @@ class Testing(TestCase):
         result = self.db.deleteTask(1)
 
         # then
-        self.assertEqual(result['status'], FAILURE)
+        self.assertEqual(result['isDeleted'], FAILURE)

@@ -2,13 +2,17 @@
 
 ## Frontend
 
+### Running the Project
+
+Execute the run.sh or run.bat scripts in the root of the project.
+
 ### Task Display
 
 - If the status of a task is 'COMPLETE' the task will appear green.
 
 ## Backend
 
-### importing the backend into a project
+### Importing the Backend into a Project
 
 from backend.backend import Database
 
@@ -22,13 +26,13 @@ All Database functions may return an optional 'errorMsg' field, that describes w
 
 createTask(title: str, status: str, dueDateTime: 'YYYY-MM-DD hh:mm:ss', description: optional(str))
 
-    -> {'status':{1,0,-1}}
+    -> {'isCreated':{1,0,-1}}
 
-    status==1 => success
+    isCreated==1 => success
 
-    status==0 => failure
+    isCreated==0 => failure
 
-    idFound==-1 => an exception occurred, so if the row was created is unclear
+    isCreated==-1 => an exception occurred, so if the row was created is unclear
 
 getTask(id: int)
 
@@ -46,20 +50,26 @@ getTasks()
 
 updateTaskStatus(id: int, newStatus: str)
 
-    -> {'status':{1,0,-1}}
+    -> {'isUpdated':{1,0,-1}}
 
-    idFound==1 => row was updated
+    isUpdated==1 => row was updated
 
-    idFound==0 => row was not updated
+    isUpdated==0 => row was not updated
 
-    idFound==-1 => an exception occurred, so the if the row was updated is unclear
+    isUpdated==-1 => an exception occurred, so the if the row was updated is unclear
 
 deleteTask(id: int)
 
-    -> {'status':{1,0,-1}}
+    -> {'isDeleted':{1,0,-1}}
 
-    idFound==1 => row was deleted
+    isDeleted==1 => row was deleted
 
-    idFound==0 => row was not deleted
+    isDeleted==0 => row was not deleted
     
-    idFound==-1 => an exception occurred, so the if the row was deleted is unclear
+    isDeleted==-1 => an exception occurred, so the if the row was deleted is unclear
+
+### Testing
+
+To test the backend project, run the test.sh or test.bat scripts in the root of the project.
+
+Alternatively, make run 'python -m unittest backend.test.test_backend' or 'python3 -m unittest backend.test.test_backend'

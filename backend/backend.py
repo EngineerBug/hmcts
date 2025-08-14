@@ -22,22 +22,22 @@ class Database:
     # create task
     def createTask(self, title, status, dueDateTime, description=''):
         if title == '' or title is None:
-            return {'status':FAILURE, ERROR_MSG_NAME:'failed to create, title was empty'}
+            return {'isCreated':FAILURE, ERROR_MSG_NAME:'failed to create, title was empty'}
         if status == '' or status is None:
-            return {'status':FAILURE, ERROR_MSG_NAME:'failed to create, status was empty'}
+            return {'isCreated':FAILURE, ERROR_MSG_NAME:'failed to create, status was empty'}
         if dueDateTime == '' or dueDateTime is None:
-            return {'status':FAILURE, ERROR_MSG_NAME:'failed to create, date/time was empty'}
+            return {'isCreated':FAILURE, ERROR_MSG_NAME:'failed to create, date/time was empty'}
         try:
             datetime.strptime(dueDateTime, DATE_TIME_FORMAT)
         except ValueError:
-            return {'status':FAILURE, ERROR_MSG_NAME:f'dueDateTime format should be {DATE_TIME_FORMAT}'}
+            return {'isCreated':FAILURE, ERROR_MSG_NAME:f'dueDateTime format should be {DATE_TIME_FORMAT}'}
         
         with connect(self.database) as connection:
             cursor = connection.cursor()
             cursor.execute('insert into Task (title, description, status, dueDateTime) values (?, ?, ?, ?)', (title, description, status, dueDateTime))
             connection.commit()
-            return {'status':SUCCESS}
-        return {'status':UNKNOWN, ERROR_MSG_NAME:f'failed to add task with title {title}'}
+            return {'isCreated':SUCCESS}
+        return {'isCreated':UNKNOWN, ERROR_MSG_NAME:f'failed to add task with title {title}'}
 
     # retrieve task by id
     # {'idFound': {1, 0, -1}, 'id': int, 'title': String, 'description': String, 'status': String, 'dueDateTime': DateTime}
@@ -64,19 +64,19 @@ class Database:
     # update the status of a task
     def updateTaskStatus(self, id, newStatus):
         if newStatus == '' or newStatus is None:
-            return {'status': FAILURE, ERROR_MSG_NAME:'did not update, missing status'}
+            return {'isUpdated': FAILURE, ERROR_MSG_NAME:'did not update, missing status'}
         
         with connect(self.database) as connection:
             cursor = connection.cursor()
 
             cursor.execute('select count(id) from Task where id=?', (id,))
             if cursor.fetchone()[0] == 0:
-                return {'status': FAILURE, ERROR_MSG_NAME:'did not update, invalid id'}
+                return {'isUpdated': FAILURE, ERROR_MSG_NAME:'did not update, invalid id'}
             
             cursor.execute('update Task set status=? where id=?', (newStatus, id))
             connection.commit()
-            return {'status': SUCCESS}
-        return {'status': UNKNOWN, ERROR_MSG_NAME:f'failed to update task with id {id}'}
+            return {'isUpdated': SUCCESS}
+        return {'isUpdated': UNKNOWN, ERROR_MSG_NAME:f'failed to update task with id {id}'}
 
     # delete a task
     def deleteTask(self, id):
@@ -85,8 +85,8 @@ class Database:
 
             cursor.execute('select count(id) from Task where id=?', (id,))
             if cursor.fetchone()[0] == 0:
-                return {'status':FAILURE, ERROR_MSG_NAME:'did not delete, invalid id'}
+                return {'isDeleted':FAILURE, ERROR_MSG_NAME:'did not delete, invalid id'}
             
             cursor.execute('delete from Task where id=?', (id,))
-            return {'status': SUCCESS}
-        return {'status': UNKNOWN, ERROR_MSG_NAME:f'failed to delete task with id {id}'}
+            return {'isDeleted': SUCCESS}
+        return {'isDeleted': UNKNOWN, ERROR_MSG_NAME:f'failed to delete task with id {id}'}
