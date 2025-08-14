@@ -72,4 +72,4 @@ deleteTask(id: int)
 
 To test the backend project, run the test.sh or test.bat scripts in the root of the project.
 
-Alternatively, make run 'python -m unittest backend.test.test_backend' or 'python3 -m unittest backend.test.test_backend'
+Alternatively, run 'python -m unittest backend.test.test_backend' or 'python3 -m unittest backend.test.test_backend' in the command line.
