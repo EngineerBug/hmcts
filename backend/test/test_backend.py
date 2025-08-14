@@ -1,5 +1,5 @@
-from backend.backend import Respository
-from backend.py.consts import CREATE_TASK_TABLE_SQL_STRING, FAILURE, DATE_TIME_FORMAT, ERROR_MSG_NAME
+from backend.backend import Database
+from backend.py.consts import SUCCESS, FAILURE, ERROR_MSG_NAME
 from sqlite3 import connect
 from unittest import TestCase
 from datetime import datetime
@@ -10,9 +10,8 @@ DB = TEST_DB_NAME + '.db'
 class Testing(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.db = Respository(TEST_DB_NAME)
+        cls.db = Database(TEST_DB_NAME)
         cls.connection = connect(DB)
-        cls.connection.execute(CREATE_TASK_TABLE_SQL_STRING)
         cls.cursor = cls.connection.cursor()
 
     @classmethod
@@ -29,13 +28,14 @@ class Testing(TestCase):
 
     def testAdd_success(self):
         # given
-        self.db.createTask('task3', 'NOT STARTED', '2026-12-05 09:45:00', 'asgfagrgesdvcwadh')
+        creation = self.db.createTask('task3', 'NOT STARTED', '2026-12-05 09:45:00', 'asgfagrgesdvcwadh')
 
         # when
         self.cursor.execute('select * from Task where title=\'task3\'')
         result = self.cursor.fetchall()
 
         # then
+        self.assertEqual(creation['status'], SUCCESS)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0][1], 'task3')
         self.assertEqual(result[0][2], 'asgfagrgesdvcwadh')
@@ -48,7 +48,7 @@ class Testing(TestCase):
         result = self.db.createTask('', 'NOT STARTED', '2026-12-05 09:45:00', 'asgfagrgesdvcwadh')
 
         # then
-        self.assertEqual(result['errorMsg'], 'failed to create, title was empty')
+        self.assertEqual(result['status'], FAILURE)
 
     def testAdd_noneTitle(self):
         # given
@@ -97,16 +97,18 @@ class Testing(TestCase):
         result = self.db.createTask('task3', 'NOT STARTED', 'INVALID', 'asgfagrgesdvcwadh')
 
         # then
-        self.assertEqual(result[ERROR_MSG_NAME], f'dueDateTime format should be {DATE_TIME_FORMAT}')
+        self.assertEqual(result['status'], FAILURE)
 
     def testGetById_success(self):
         # given
         self.cursor.execute('select * from Task where title=\'task1\'')
         id = self.cursor.fetchone()[0]
+
         # when
         result = self.db.getTask(id)
 
         # then
+        self.assertEqual(result['idFound'], SUCCESS)
         self.assertEqual(result['title'], 'task1')
         self.assertEqual(result['description'], 'description')
         self.assertEqual(result['status'], 'COMPLETE')
@@ -132,6 +134,7 @@ class Testing(TestCase):
         # then
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0]['title'], 'task1')
+        self.assertEqual(results[1]['title'], 'task2')
 
     def testRetriveAllTasks_empty(self):
         # given
@@ -148,16 +151,17 @@ class Testing(TestCase):
         # given
         self.cursor.execute('select id from Task where title=\'task2\'')
         id = self.cursor.fetchone()[0]
-        self.db.updateTaskStatus(id, 'COMPLETE')
 
         # when
-        result = self.db.getTask(id)
+        result = self.db.updateTaskStatus(id, 'COMPLETE')
+        row = self.db.getTask(id)
         
         # then
-        self.assertEqual(result['title'], 'task2')
-        self.assertEqual(result['description'], '')
-        self.assertEqual(result['status'], 'COMPLETE')
-        self.assertEqual(result['dueDateTime'], datetime(2026, 1, 13, 23, 59, 59))
+        self.assertEqual(result['status'], SUCCESS)
+        self.assertEqual(row['title'], 'task2')
+        self.assertEqual(row['description'], '')
+        self.assertEqual(row['status'], 'COMPLETE')
+        self.assertEqual(row['dueDateTime'], datetime(2026, 1, 13, 23, 59, 59))
 
     def testUpdate_emptyStatus(self):
         # given
@@ -166,9 +170,11 @@ class Testing(TestCase):
 
         # when
         result = self.db.updateTaskStatus(id, '')
+        row = self.db.getTask(id)
 
         # then
-        self.assertEqual(result[ERROR_MSG_NAME], 'did not update, missing status')
+        self.assertEqual(row['status'], 'IN PROGRESS')
+        self.assertEqual(result['status'], FAILURE)
 
     def testUpdate_invalidId(self):
         # given
@@ -179,19 +185,20 @@ class Testing(TestCase):
         result = self.db.updateTaskStatus(1, 'COMPLETE')
 
         # then
-        self.assertEqual(result[ERROR_MSG_NAME], 'did not update, invalid id')
+        self.assertEqual(result['status'], FAILURE)
 
     def testDelete_success(self):
         # given
         self.cursor.execute('select * from Task where title=\'task2\'')
         id = self.cursor.fetchone()[0]
-        self.db.deleteTask(id)
 
         # when
-        result = self.db.getTask(id)
+        result = self.db.deleteTask(id)
+        row = self.db.getTask(id)
         
         # then
-        self.assertEqual(result['idFound'], FAILURE)
+        self.assertEqual(result['status'], SUCCESS)
+        self.assertEqual(row['idFound'], FAILURE)
 
     def testDelete_invalidId(self):
         # given
@@ -202,4 +209,4 @@ class Testing(TestCase):
         result = self.db.deleteTask(1)
 
         # then
-        self.assertEqual(result[ERROR_MSG_NAME], 'did not delete, invalid id')
+        self.assertEqual(result['status'], FAILURE)
