@@ -56,7 +56,7 @@ class Testing(TestCase):
         result = self.db.createTask(None, 'NOT STARTED', '2026-12-05 09:45:00', 'asgfagrgesdvcwadh')
 
         # then
-        self.assertEqual(result['errorMsg'], 'failed to create, title was empty')
+        self.assertEqual(result[ERROR_MSG_NAME], 'failed to create, title was empty')
 
     def testAdd_emptyStatus(self):
         # given
@@ -64,7 +64,7 @@ class Testing(TestCase):
         result = self.db.createTask('task3', '', '2026-12-05 09:45:00', 'asgfagrgesdvcwadh')
 
         # then
-        self.assertEqual(result['errorMsg'], 'failed to create, status was empty')
+        self.assertEqual(result[ERROR_MSG_NAME], 'failed to create, status was empty')
 
     def testAdd_noneStatus(self):
         # given
@@ -72,7 +72,7 @@ class Testing(TestCase):
         result = self.db.createTask('task3', None, '2026-12-05 09:45:00', 'asgfagrgesdvcwadh')
 
         # then
-        self.assertEqual(result['errorMsg'], 'failed to create, status was empty')
+        self.assertEqual(result[ERROR_MSG_NAME], 'failed to create, status was empty')
 
     def testAdd_emptyDueDateTime(self):
         # given
@@ -80,7 +80,7 @@ class Testing(TestCase):
         result = self.db.createTask('task3', 'NOT STARTED', '', 'asgfagrgesdvcwadh')
 
         # then
-        self.assertEqual(result['errorMsg'], 'failed to create, date/time was empty')
+        self.assertEqual(result[ERROR_MSG_NAME], 'failed to create, date/time was empty')
 
     def testAdd_noneDueDateTime(self):
         # given
@@ -88,7 +88,7 @@ class Testing(TestCase):
         result = self.db.createTask('task3', 'NOT STARTED', None, 'asgfagrgesdvcwadh')
 
         # then
-        self.assertEqual(result['errorMsg'], 'failed to create, date/time was empty')
+        self.assertEqual(result[ERROR_MSG_NAME], 'failed to create, date/time was empty')
 
     def testAdd_wrongDateTimeFormat(self):
         # given
@@ -112,7 +112,7 @@ class Testing(TestCase):
         self.assertEqual(result['title'], 'task1')
         self.assertEqual(result['description'], 'description')
         self.assertEqual(result['status'], 'COMPLETE')
-        self.assertEqual(result['dueDateTime'], datetime(2020, 12, 5, 12, 55, 10))
+        self.assertEqual(result['dueDateTime'], '2020-12-05 12:55:10')
 
     def testGetById_invalidId(self):
         # given
@@ -161,7 +161,7 @@ class Testing(TestCase):
         self.assertEqual(row['title'], 'task2')
         self.assertEqual(row['description'], '')
         self.assertEqual(row['status'], 'COMPLETE')
-        self.assertEqual(row['dueDateTime'], datetime(2026, 1, 13, 23, 59, 59))
+        self.assertEqual(row['dueDateTime'], '2026-12-05 09:45:00')
 
     def testUpdate_emptyStatus(self):
         # given

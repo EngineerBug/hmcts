@@ -48,7 +48,7 @@ class Database:
             row = cursor.fetchone()
             if row == None:
                 return {'idFound':FAILURE, ERROR_MSG_NAME:f'id {id} not found in Tasks'}
-            return {'idFound':SUCCESS, 'id':row[0], 'title':row[1], 'description':row[2], 'status':row[3], 'dueDateTime':datetime.strptime(row[4], DATE_TIME_FORMAT)}
+            return {'idFound':SUCCESS, 'id':row[0], 'title':row[1], 'description':row[2], 'status':row[3], 'dueDateTime':row[4]}
         return {'idFound':UNKNOWN, ERROR_MSG_NAME:f'failed to get task with id {id}'}
 
     # retrieve all tasks
@@ -58,7 +58,7 @@ class Database:
             cursor = connection.cursor()
             cursor.execute('select * from Task')
             rows = cursor.fetchall()
-            return [{'id':row[0], 'title':row[1], 'description':row[2], 'status':row[3], 'dueDateTime':datetime.strptime(row[4], DATE_TIME_FORMAT)} for row in rows]
+            return [{'id':row[0], 'title':row[1], 'description':row[2], 'status':row[3], 'dueDateTime':row[4]} for row in rows]
         return {ERROR_MSG_NAME:'get task action failed'}
 
     # update the status of a task
