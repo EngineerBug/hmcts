@@ -37,7 +37,7 @@ def create():
 
     # perform the backend function call
     result = db.createTask(title, status, parsedDatetime, description)
-    logger.info(f'create result: {result}')
+    logger.info(f'created result: {result}')
 
     # return the appropriate response
     if ERROR_MSG_NAME in result:

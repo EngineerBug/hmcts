@@ -1,5 +1,9 @@
 # HMCTS Task Manager
 
+This is a relatively simple TODO app for a job application to the MOJ.
+
+Based on: https://github.com/hmcts/dts-developer-challenge?tab=readme-ov-file
+
 ## Frontend
 
 ### Running the Project
@@ -24,9 +28,7 @@ All Database functions may return an optional 'errorMsg' field, that describes w
 
 ### Database API
 
-createTask(title: str, status: str, dueDateTime: 'YYYY-MM-DD hh:mm:ss', description: optional(str))
-
-    -> {'isCreated':{1,0,-1}}
+createTask(title: str, status: str, dueDateTime: 'YYYY-MM-DD hh:mm:ss', description: optional(str)) -> {'isCreated':{1,0,-1}}
 
     isCreated==1 => success
 
@@ -34,9 +36,7 @@ createTask(title: str, status: str, dueDateTime: 'YYYY-MM-DD hh:mm:ss', descript
 
     isCreated==-1 => an exception occurred, so if the row was created is unclear
 
-getTask(id: int)
-
-    -> {'idFound': {1,0,-1}, 'id': int, 'title': String, 'description': String, 'status': String, 'dueDateTime': 'YYYY-MM-DD hh:mm:ss'}
+getTask(id: int) -> {'idFound': {1,0,-1}, 'id': int, 'title': String, 'description': String, 'status': String, 'dueDateTime': 'YYYY-MM-DD hh:mm:ss'}
 
     idFound==1 => id does exist
 
@@ -44,13 +44,9 @@ getTask(id: int)
 
     idFound==-1 => an exception occurred, so the if the row exists is unclear
 
-getTasks()
+getTasks() -> [{'id': int, 'title': String, 'description': String, 'status': String, 'dueDateTime': 'YYYY-MM-DD hh:mm:ss'}]
 
-    -> [{'id': int, 'title': String, 'description': String, 'status': String, 'dueDateTime': 'YYYY-MM-DD hh:mm:ss'}]
-
-updateTaskStatus(id: int, newStatus: str)
-
-    -> {'isUpdated':{1,0,-1}}
+updateTaskStatus(id: int, newStatus: str) -> {'isUpdated':{1,0,-1}}
 
     isUpdated==1 => row was updated
 
@@ -58,9 +54,7 @@ updateTaskStatus(id: int, newStatus: str)
 
     isUpdated==-1 => an exception occurred, so the if the row was updated is unclear
 
-deleteTask(id: int)
-
-    -> {'isDeleted':{1,0,-1}}
+deleteTask(id: int) -> {'isDeleted':{1,0,-1}}
 
     isDeleted==1 => row was deleted
 
