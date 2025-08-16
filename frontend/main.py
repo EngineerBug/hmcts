@@ -5,10 +5,16 @@ import logging
 from backend.backend import Database
 from backend.consts import ERROR_MSG_NAME
 
+# Create the app
 app = Flask(__name__)
+
+# So the flash messages can be sent
 app.secret_key = token_hex(32)
+
+# Create the backend
 db = Database('main')
 
+# Logging setup
 log_format = '%(levelname)s %(asctime)s - %(message)s'
 logging.basicConfig(filename = 'main.log',
                     level = logging.INFO,

@@ -4,6 +4,18 @@ This is a relatively simple TODO app for a job application to the MOJ.
 
 Based on: https://github.com/hmcts/dts-developer-challenge?tab=readme-ov-file
 
+## Questions
+
+If this were a real specification I had been set, I would ask these quesitons:
+
+- What format do you want the date/time in?
+- Do you want a default 'status' to be set when a task is created, or be chosen by the user?
+- Is the 'status' a plain string or some kind of Enum? E.g. {'NOT STARTED', 'IN PROGRESS', 'STALLED', 'COMPLETE'}
+- When you say the backend should be an API, do you mean a REST API, or a library with a fixed interface?
+(This question is pretty much a rephrase of the question 'Do you want Monolith or Microservices?')
+- When successfully creating, deleting or updating a task, what, if any, data should be sent back to the client?
+- Would you like the code to conform to a particular standard (e.g. camel case vs underscores)?
+
 ## Frontend
 
 ### Running the Project
