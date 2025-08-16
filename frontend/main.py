@@ -22,13 +22,26 @@ logging.basicConfig(filename = 'main.log',
                     format = log_format,)
 logger = logging.getLogger()
 
-# frontend page; create, view, update, and delete tasks in a user friendly manner
+'''
+frontend page; create, view, update, and delete tasks in a user friendly manner
+
+returns:
+a rendered HTML page with a list of tasks and a form to create new tasks
+'''
 @app.route('/', methods=['GET'])
 def main():
     tasks = db.getTasks()
     return render_template('main.html', tasks=tasks)
 
 # create task
+'''
+create a task and add it to the database
+
+uses an HTML form to receive the title, description, status and datetime fields
+
+returns:
+redirects back to the main page with a status message
+'''
 @app.route('/create', methods=['POST'])
 def create():
     title = request.form['title']
@@ -52,8 +65,20 @@ def create():
         flash(f'task successfully created', 'success')
     return redirect('/')
 
-# update the status of a task
-@app.route('/update_status/<int:id>', methods=['POST', 'PATCH', 'PUT'])
+'''
+update the status of a task in the database
+
+args:
+id - url argument
+newStatus - HTML form field
+
+since it is an update, should technically use the PATCH or PUT methods,
+however, HTML forms only support GET and POST
+
+returns:
+redirects back to the main page with a status message
+'''
+@app.route('/update_status/<int:id>', methods=['POST'])
 def updateStatus(id):
     result = db.updateTaskStatus(id, request.form['newStatus'])
     if ERROR_MSG_NAME in result:
@@ -62,8 +87,19 @@ def updateStatus(id):
         flash(f'task successfully updated', 'success')
     return redirect('/')
 
-# delete a task
-@app.route('/delete/<int:id>', methods=['POST', 'DELETE'])
+'''
+delete a task from the database
+
+args:
+id - url argument
+
+since it is an update, should technically use the DELETE method,
+however, HTML forms only support GET and POST.
+
+returns:
+redirects back to the main page with a status message
+'''
+@app.route('/delete/<int:id>', methods=['POST'])
 def delete(id):
     result = db.deleteTask(id)
     if ERROR_MSG_NAME in result:

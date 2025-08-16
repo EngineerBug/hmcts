@@ -11,6 +11,20 @@ logging.basicConfig(filename = 'main.log',
                     format = log_format,)
 logger = logging.getLogger()
 
+'''
+each Database object stores a reference to a .db file in the filesystem
+the database is automatically created/located when the object is instantiated
+
+all function calls on the object trigger database interactions with the referenced database
+
+API short-list:
+    Database(dbName) - constructor
+    createTask(title, status, dueDateTime, description='')
+    getTask(id)
+    getTasks()
+    updateTaskStatus(id, newStatus)
+    deleteTask(id)
+'''
 class Database:
     def __init__(self, dbName):
         self.database = f'{dbName}.db' 
@@ -19,7 +33,7 @@ class Database:
 
     '''
     sqlite3 stores tables in a single file, {dbName}.db
-    If the file does not exist, the make() function will create it 
+    if the file does not exist, the make() function will create it 
     '''
     def make(self):
         with connect(self.database) as connection:
@@ -33,19 +47,34 @@ class Database:
             )''')
             connection.commit()
 
-    # create task
+    '''
+    create a task
+
+    args:
+    title - mandatory, cannot be null, string
+    status - mandatory, cannot be null, string
+    dueDateTime - mandatory, cannot be null, string
+    description - optional, default='', string
+
+    return:
+    {'isCreated':{1,0,-1})
+    '''
     def createTask(self, title, status, dueDateTime, description=''):
+        # check mandatory fields are not empty
         if title == '' or title is None:
             return {'isCreated':FAILURE, ERROR_MSG_NAME:'failed to create, title was empty'}
         if status == '' or status is None:
             return {'isCreated':FAILURE, ERROR_MSG_NAME:'failed to create, status was empty'}
         if dueDateTime == '' or dueDateTime is None:
             return {'isCreated':FAILURE, ERROR_MSG_NAME:'failed to create, date/time was empty'}
+        
+        # check deadtime is correct format
         try:
             datetime.strptime(dueDateTime, DATE_TIME_FORMAT)
         except ValueError:
             return {'isCreated':FAILURE, ERROR_MSG_NAME:f'dueDateTime format should be {DATE_TIME_FORMAT}'}
         
+        # execute the create on the database
         try:
             with connect(self.database) as connection:
                 cursor = connection.cursor()
@@ -55,8 +84,16 @@ class Database:
         except:
             return {'isCreated':UNKNOWN, ERROR_MSG_NAME:f'failed to add task with title {title}'}
 
-    # retrieve task by id
-    # {'idFound': {1, 0, -1}, 'id': int, 'title': String, 'description': String, 'status': String, 'dueDateTime': DateTime}
+    '''
+    retrieve task by id
+    if the id is not found in the database, an error message will be returned.
+
+    args:
+    id - the unique id of the row
+
+    return:
+    {'idFound': {1, 0, -1}, 'id': int, 'title': String, 'description': String, 'status': String, 'dueDateTime': DateTime}
+    '''
     def getTask(self, id):
         try:
             with connect(self.database) as connection:
@@ -69,8 +106,12 @@ class Database:
         except:
             return {'idFound':UNKNOWN, ERROR_MSG_NAME:f'failed to get task with id {id}'}
 
-    # retrieve all tasks
-    # [{'id': int, 'title': String, 'description': String, 'status': String, 'dueDateTime': DateTime}]
+    '''
+    retrieve all tasks
+
+    return:
+    [{'id': int, 'title': String, 'description': String, 'status': String, 'dueDateTime': DateTime}]
+    '''
     def getTasks(self):
         try:
             with connect(self.database) as connection:
@@ -81,7 +122,17 @@ class Database:
         except:
             return {ERROR_MSG_NAME:'get task action failed'}
 
-    # update the status of a task
+    '''
+    update the status field of a particular task
+    if there are somehow duplicate ids, all of them will be updated
+
+    args:
+    id - mandatory, cannot be null, int
+    newStatus - mandatory, cannot be null, string
+
+    return:
+    {'isUpdated':{1, 0, -1}}
+    '''
     def updateTaskStatus(self, id, newStatus):
         if newStatus == '' or newStatus is None:
             return {'isUpdated': FAILURE, ERROR_MSG_NAME:'did not update, missing status'}
@@ -103,6 +154,17 @@ class Database:
             return {'isUpdated': UNKNOWN, ERROR_MSG_NAME:f'failed to update task with id {id}'}
 
     # delete a task
+    '''
+    delete a particular task
+    if there are somehow duplicate ids, all of them will be deleted
+
+    args:
+    id - mandatory, cannot be null, int
+    newStatus - mandatory, cannot be null, string
+
+    return:
+    {'isDeleted':{1, 0, -1}}
+    '''
     def deleteTask(self, id):
         try:
             with connect(self.database) as connection:
